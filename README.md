@@ -5,4 +5,5 @@
     借此上传的机会，本人在对原工具包进行整理和升级，后续将继续完善。
 
 ### Requirments
-    pandas/openpyxl/pywin32/scrapy/peewee/APScheduler
+    used:pandas/openpyxl/peewee/
+    to use:pywin32/scrapy/APScheduler/pyautogui/opencv-python/pynput/
