@@ -1,6 +1,6 @@
 import peewee as pw
 import pandas as pd
-from on_mysql.select import ModelSelect
+from on_database.select import ModelSelect
 
 class BaseModel(pw.Model):
 
