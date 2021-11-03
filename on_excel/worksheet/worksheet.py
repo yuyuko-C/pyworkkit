@@ -41,25 +41,6 @@ class Worksheet(o_sheet.Worksheet):
     def set_freeze_panes(self, coordinate: str):
         self.freeze_panes = coordinate
 
-    def delete_blank_rows_and_columns(self):
-        self.max_column
-        col_index = 1
-        for col in self.iter_cols(values_only=True, max_col=100):
-            cells = [str(cell).strip() for cell in col if cell != None]
-            if all([not cell for cell in cells]):
-                self.delete_cols(col_index, self.max_column-col_index+1)
-                break
-            col_index += 1
-        row_index = 1
-        for row in self.iter_rows(values_only=True):
-            cells = [str(cell).strip() for cell in row if cell != None]
-            if all([not cell for cell in cells]):
-                self.delete_rows(row_index, self.max_row-row_index+1)
-                break
-            row_index += 1
-        print(self.title, '已清空多余的行列')
-        return self
-
     def clear(self, style=True):
         """Clear all content in sheet.
 
@@ -148,53 +129,45 @@ class Worksheet(o_sheet.Worksheet):
         df.drop(range(0, columns_row+1), inplace=True, axis=0)  # 丢弃行
         return df
 
-    def merge_colist(self, by, colist,  alig=False):
-        def get_samerows_on_col(self, by: str):
-            ret_rowlists = []
-            row = 0
-            _col = self[by]
-            _max_row = self.max_row-1
-            while row < _max_row:
-                cur_cell = _col[row]
-                # 如果当前cell存在值且值不等于空
-                if cur_cell.value and cur_cell.value != '':
-                    check_row = row+1
-                    # 寻找下面的cell截止到哪里不一致
-                    while check_row <= _max_row:
-                        check_cell = _col[check_row]
-                        if check_cell.value and check_cell.value != '':
-                            if cur_cell.value == check_cell.value:
-                                check_row += 1
-                            else:
-                                check_row -= 1
-                                break
-                        else:
-                            check_row -= 1
-                            break
+    def merge_colist(self, by: str, colist,  align=False):
+        """在 colist 中合并，根据 by 列找到可合并的 行范围
 
-                    # 如果有连续两格以上的单元格内容相同，进行融合
-                    if check_row-row >= 1:
-                        ret_rowlists.append([row+1, check_row+1])
+        Args:
+            by ([type]): [description]
+            colist ([type]): [description]
+            align (bool, optional): [description]. Defaults to False.
+        """
 
-                    # 忽略已经合并的单元格
-                    row = check_row
-                row += 1
-            return ret_rowlists
+        def same_value_group(cell_arr):
+            groups = []
 
-        def merge_cells_on_col(self, pair_rows, cols, alig=False):
-            for rows in pair_rows:
-                row, check_row = rows[0], rows[1]
-                for col in cols:
-                    msg = '%s%d:%s%d' % (col, row, col, check_row)
-                    self.merge_cells(msg)
-                    if alig:
-                        self['%s%d' % (col, row)].alignment = Alignment(horizontal='center',
-                                                                        vertical='center',
-                                                                        wrap_text=True)
-            return self
+            left = right = 0
+            max_index = len(cell_arr)-1
+            while right <= max_index:
+                value_left = cell_arr[left].value
+                value_right = cell_arr[right].value
+                if value_right == value_left:
+                    if right == max_index:
+                        groups.append((left, right))
+                    right += 1
+                else:
+                    if right-1 > left:
+                        groups.append((left, right-1))
+                    left = right
 
-        pair_rows = get_samerows_on_col(self, by)
-        return merge_cells_on_col(self, pair_rows, list(colist), alig)
+            return groups
+
+        row_groups = same_value_group(self[by])
+
+        for group in row_groups:
+            for col in colist:
+                left_coordinate = "%s%d" % (col, group[0])
+                right_coordinate = "%s%d" % (col,  group[1])
+                self.merge_cells('%s:%s' % (left_coordinate, right_coordinate))
+                if align:
+                    alignment = Alignment("center", "center", wrap_text=True)
+                    self[left_coordinate].alignment = alignment
+        return self
 
     # 样式属性
     def sys_style(self, tar_sheet):
