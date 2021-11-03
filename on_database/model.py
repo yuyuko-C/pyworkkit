@@ -59,7 +59,7 @@ class BaseModel(pw.Model):
             db.drop_tables([cls])
 
     @classmethod
-    def reinstance(cls):
+    def recreate(cls):
         if cls.exists():
             cls.drop()
         cls.create()
@@ -72,7 +72,7 @@ class BaseModel(pw.Model):
 
     @classmethod
     def rewrite_df(cls, df: pd.DataFrame):
-        cls.reinstance()
+        cls.recreate()
         cls.append_df(df)
 
     @classmethod
