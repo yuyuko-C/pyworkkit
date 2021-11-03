@@ -6,4 +6,4 @@
 
 ### Requirments
     used:pandas/openpyxl/peewee/
-    to use:pywin32/scrapy/APScheduler/pyautogui/opencv-python/pynput/
+    to use:pywin32/scrapy/pyautogui/opencv-python/pynput/
