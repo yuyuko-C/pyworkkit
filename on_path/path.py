@@ -22,13 +22,16 @@ class Path(pathlib.Path):
         self._init()
         return self
 
-    if WIN32API:
-        def select(self):
-            """
-            Select the position.
-            """
+    def select(self):
+        """
+        Select the position.
+        """
+
+        if WIN32API:
             win32api.ShellExecute(
                 None, "open", "explorer.exe", '/select,{}'.format(self.path), '', win32con.SW_SHOW)
+        else:
+            raise ImportError()
 
     def execute(self):
         """
@@ -67,26 +70,33 @@ class Path(pathlib.Path):
         elif self.is_dir():
             shutil.copytree(self, dest)
 
-    def walk_dir(self):
+    def walk_dir(self, *skip):
         for root, dirs, files in os.walk(self):
+            if any([Path(root).is_relative_to(k) for k in skip]):
+                continue
             for d in dirs:
                 yield Path(os.path.join(root, d))
-            
-    def walk_file(self):
+
+    def walk_file(self, *skip):
         for root, dirs, files in os.walk(self):
+            if any([Path(root).is_relative_to(k) for k in skip]):
+                continue
             for f in files:
                 if '~$' in f:
                     continue
                 else:
                     yield Path(os.path.join(root, f))
 
-    def info(self):
-        if self.is_file():
-            yield self.stat()
-        elif self.is_dir():
-            for p in self.walk_file():
-                yield p.stat()
+    def stat_dir(self):
+        for p in self.walk_file():
+            yield p.stat()
 
+    def is_relative_to(self, path):
+        try:
+            rel = bool(self.relative_to(path))
+        except ValueError as e:
+            rel = False
+        return rel
 
 
 class PureWindowsPath(pathlib.PureWindowsPath):
@@ -95,4 +105,3 @@ class PureWindowsPath(pathlib.PureWindowsPath):
 
 class WindowsPath(Path, PureWindowsPath):
     pass
-
