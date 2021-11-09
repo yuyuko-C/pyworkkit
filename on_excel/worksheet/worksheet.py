@@ -129,45 +129,54 @@ class Worksheet(o_sheet.Worksheet):
         df.drop(range(0, columns_row+1), inplace=True, axis=0)  # 丢弃行
         return df
 
-    def merge_colist(self, by: str, colist,  align=False):
-        """在 colist 中合并，根据 by 列找到可合并的 行范围
+    def merge_col(self, col: str, start_row: int, end_row: int,  align=False):
+        """在 col 列合并 从 start_row 到 end_row 之间的单元格
 
         Args:
-            by ([type]): [description]
-            colist ([type]): [description]
+            col (str): [description]
+            start_row (int): [description]
+            end_row (int): [description]
             align (bool, optional): [description]. Defaults to False.
+
+        Returns:
+            [type]: [description]
         """
-
-        def same_value_group(cell_arr):
-            groups = []
-
-            left = right = 0
-            max_index = len(cell_arr)-1
-            while right <= max_index:
-                value_left = cell_arr[left].value
-                value_right = cell_arr[right].value
-                if value_right == value_left:
-                    if right == max_index:
-                        groups.append((left, right))
-                    right += 1
-                else:
-                    if right-1 > left:
-                        groups.append((left, right-1))
-                    left = right
-
-            return groups
-
-        row_groups = same_value_group(self[by])
-
-        for group in row_groups:
-            for col in colist:
-                left_coordinate = "%s%d" % (col, group[0])
-                right_coordinate = "%s%d" % (col,  group[1])
-                self.merge_cells('%s:%s' % (left_coordinate, right_coordinate))
-                if align:
-                    alignment = Alignment("center", "center", wrap_text=True)
-                    self[left_coordinate].alignment = alignment
+        left_coordinate = "%s%d" % (col, start_row)
+        right_coordinate = "%s%d" % (col,  end_row)
+        self.merge_cells('%s:%s' % (left_coordinate, right_coordinate))
+        if align:
+            alignment = Alignment("center", "center", wrap_text=True)
+            self[left_coordinate].alignment = alignment
         return self
+
+    def same_value_group(self, col:str):
+        """在 col 列寻找所有值连续相同的单元格，并返回其首尾行的列表
+
+        Args:
+            col (str): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        groups = []
+
+        left = right = 0
+        cell_arr = self[col]
+        max_index = len(cell_arr)-1
+
+        while right <= max_index:
+            value_left = cell_arr[left].value
+            value_right = cell_arr[right].value
+            if value_right == value_left:
+                if right == max_index:
+                    groups.append((left, right))
+                right += 1
+            else:
+                if right-1 > left:
+                    groups.append((left, right-1))
+                left = right
+
+        return groups
 
     # 样式属性
     def sys_style(self, tar_sheet):
