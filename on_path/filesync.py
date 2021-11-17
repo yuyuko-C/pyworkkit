@@ -29,7 +29,7 @@ class SyncGroup:
                     return not self.__filters_mode
         return self.__filters_mode
 
-    def clean_target(self):
+    def __clean_target(self):
         # 先比较文件夹
         for target in self.target.walk_dir():
             relpath = target.relative_to(self.target)
@@ -56,7 +56,7 @@ class SyncGroup:
                 # 不能通过过滤器则不该同步，直接移除
                 target.unlink()
 
-    def source_to_target(self):
+    def __source_to_target(self):
         # 遍历没有的文件夹，复制并收录到copy_folder
         copy_folder = []
         for source in self.source.walk_dir():
@@ -80,13 +80,22 @@ class SyncGroup:
                     if target.stat().st_mtime != source.stat().st_mtime:
                         source.copy_to(target)
 
-    def execute(self):
+    def execute_same(self):
         # 1.检查target比source多出来的路径，删除
         # 2.检查source比target多出来的路径，复制
         # 3.检查source与target一致的路径，检查
         # 1.如果文件信息一致，不变
         # 2.如果文件信息不一致，替换
 
-        self.clean_target()
-        self.source_to_target()
+        self.__clean_target()
+        self.__source_to_target()
+        pass
+    
+    def execute_addition(self):
+        # 1.检查source比target多出来的路径，复制
+        # 2.检查source与target一致的路径，检查
+        # 1.如果文件信息一致，不变
+        # 2.如果文件信息不一致，替换
+
+        self.__source_to_target()
         pass
