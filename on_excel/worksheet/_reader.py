@@ -6,7 +6,7 @@ from openpyxl.xml.constants import (
 )
 
 
-from on_excel.cell import Cell
+from ..cell import Cell
 
 VALUE_TAG = '{%s}v' % SHEET_MAIN_NS
 
