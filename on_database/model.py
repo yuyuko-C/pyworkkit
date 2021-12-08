@@ -2,8 +2,9 @@ import peewee as pw
 import pandas as pd
 from on_database.select import ModelSelect
 
-class BaseModel(pw.Model):
 
+
+class Database:
     @classmethod
     def login_mysql(cls, db_name: str, host: str, port: int, user: str, password: str):
         db = pw.MySQLDatabase(db_name,
@@ -11,7 +12,7 @@ class BaseModel(pw.Model):
                               port=port,
                               user=user,
                               password=password)
-        cls._meta.database = db
+        return db
 
     @classmethod
     def login_sqlite(cls, db_name: str, host: str, port: int, user: str, password: str):
@@ -20,7 +21,7 @@ class BaseModel(pw.Model):
                                port=port,
                                user=user,
                                password=password)
-        cls._meta.database = db
+        return db
 
     @classmethod
     def login_postgre(cls, db_name: str, host: str, port: int, user: str, password: str):
@@ -29,6 +30,18 @@ class BaseModel(pw.Model):
                                    port=port,
                                    user=user,
                                    password=password)
+        return db
+
+
+
+class BaseModel(pw.Model):
+
+    @classmethod
+    def get_database(cls):
+        return cls._meta.database 
+
+    @classmethod
+    def set_database(cls,db:pw.Database):
         cls._meta.database = db
 
     @classmethod
