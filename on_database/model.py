@@ -1,3 +1,4 @@
+import typing
 import peewee as pw
 import pandas as pd
 from on_database.select import ModelSelect
@@ -8,7 +9,7 @@ from on_database.select import ModelSelect
 class BaseModel(pw.Model):
 
     @classmethod
-    def get_database(cls):
+    def get_database(cls)->typing.Union[pw.Database,None]:
         return cls._meta.database 
 
     @classmethod
@@ -26,27 +27,10 @@ class BaseModel(pw.Model):
         return inner
     
     @classmethod
-    def exists(cls):
-        db: pw.Database = cls._meta.database
-        return db.table_exists(cls.__name__.lower())
-
-    @classmethod
-    def create(cls):
-        db: pw.Database = cls._meta.database
-        with db.atomic():
-            db.create_tables([cls])
-
-    @classmethod
-    def drop(cls):
-        db: pw.Database = cls._meta.database
-        with db.atomic():
-            db.drop_tables([cls])
-
-    @classmethod
     def recreate(cls):
-        if cls.exists():
-            cls.drop()
-        cls.create()
+        if cls.table_exists():
+            cls.drop_table()
+        cls.create_table()
 
     @classmethod
     def append_df(cls, df: pd.DataFrame, fields: list = None):
@@ -65,7 +49,7 @@ class BaseModel(pw.Model):
 
     @classmethod
     def reset_auto_increment(cls):
-        db: pw.Database = cls._meta.database
+        db = cls.get_database()
         table_name = cls.__name__.lower()
         db.execute_sql("alter table `{}` auto_increment=1;".format(table_name))
 
