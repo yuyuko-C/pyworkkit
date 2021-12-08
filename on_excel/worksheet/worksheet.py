@@ -1,3 +1,4 @@
+import typing
 
 import openpyxl.worksheet.worksheet as o_sheet
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
@@ -256,18 +257,22 @@ class Worksheet(o_sheet.Worksheet):
             max_len = get_maxlength(self, letter, begin_cal_row)
             self.set_column_width(letter, max_len)
 
-    def get_cell_list(self, slice: str, filter: list = None):
-        cell_list = []
-        if filter == None:
-            [[cell_list.append(cell) for cell in cell_tuple]
-                for cell_tuple in self[slice]]
-        else:
-            [[cell_list.append(cell) for cell in cell_tuple if cell.row in filter]
-                for cell_tuple in self[slice]]
+    def get_cell_list(self, slice: str, filter: typing.List[int] = None):
+        cell_list:typing.List[Cell] = []
+       
+        def get_cell(ele):
+            if isinstance(ele,Cell):
+                if ele.row not in filter:
+                    cell_list.append(ele)
+            elif isinstance(ele,(tuple,list)):
+                for a in ele:
+                    get_cell(a)
+        
+        get_cell(self[slice])
         return cell_list
 
     # 重写此方法，用于快速获取表格中的单元格
-    def __getitem__(self, index):
+    def __getitem__(self, index)->typing.Union[Cell,typing.Tuple[Cell],typing.Tuple[typing.Tuple[Cell]]]:
         if type(index) == tuple:
             return self.cell(index[0], index[1])
         return super(Worksheet, self).__getitem__(index)
