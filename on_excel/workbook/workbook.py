@@ -5,7 +5,7 @@ from openpyxl.utils.exceptions import ReadOnlyWorkbookException
 from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 
 
-from on_excel.worksheet.worksheet import Worksheet
+from ..worksheet.worksheet import Worksheet
 
 
 class Workbook(ow.Workbook):

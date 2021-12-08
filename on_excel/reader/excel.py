@@ -70,9 +70,9 @@ SUPPORTED_FORMATS = ('.xlsx', '.xlsm', '.xltx', '.xltm')
 import openpyxl.reader.excel as o_excel
 
 
-from on_excel.worksheet._reader import WorksheetReader
-from on_excel.reader.workbook import WorkbookParser
-from on_excel.cell import MergedCell
+from ..worksheet._reader import WorksheetReader
+from .workbook import WorkbookParser
+from ..cell import MergedCell
 
 
 

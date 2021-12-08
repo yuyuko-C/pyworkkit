@@ -7,8 +7,8 @@ from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
 from email.utils import parseaddr, formataddr
 
-from on_email.error import OnceError
-from on_email.html import Html_Maker
+from .error import OnceError
+from .html import Html_Maker
 
 
 def before_instance(method):

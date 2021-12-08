@@ -2,7 +2,7 @@ import win32api
 import win32gui
 import win32con
 
-from on_script.simulatekm import SimulateKM
+from .simulatekm import SimulateKM
 from typing import Union
 
 

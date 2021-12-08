@@ -1,7 +1,7 @@
 import typing
 import peewee as pw
 import pandas as pd
-from on_database.select import ModelSelect
+from .select import ModelSelect
 
 
 

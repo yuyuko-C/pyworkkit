@@ -6,7 +6,7 @@ from inspect import isgenerator
 import pandas as pd
 
 
-from on_excel.cell import Cell, MergedCell
+from ..cell import Cell, MergedCell
 
 
 class Worksheet(o_sheet.Worksheet):

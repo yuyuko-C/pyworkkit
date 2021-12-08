@@ -1,6 +1,6 @@
 import openpyxl.reader.workbook as o_book
 
-from on_excel.workbook.workbook import Workbook
+from ..workbook.workbook import Workbook
 
 
 class WorkbookParser(o_book.WorkbookParser):
