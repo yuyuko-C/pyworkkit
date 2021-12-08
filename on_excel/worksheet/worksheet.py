@@ -256,6 +256,16 @@ class Worksheet(o_sheet.Worksheet):
             max_len = get_maxlength(self, letter, begin_cal_row)
             self.set_column_width(letter, max_len)
 
+    def get_cell_list(self, slice: str, filter: list = None):
+        cell_list = []
+        if filter == None:
+            [[cell_list.append(cell) for cell in cell_tuple]
+                for cell_tuple in self[slice]]
+        else:
+            [[cell_list.append(cell) for cell in cell_tuple if cell.row in filter]
+                for cell_tuple in self[slice]]
+        return cell_list
+
     # 重写此方法，用于快速获取表格中的单元格
     def __getitem__(self, index):
         if type(index) == tuple:
