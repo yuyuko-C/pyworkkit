@@ -4,8 +4,9 @@ import openpyxl.workbook.workbook as ow
 from openpyxl.utils.exceptions import ReadOnlyWorkbookException
 from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 
-
 from ..worksheet.worksheet import Worksheet
+
+from ...utils.function import Others
 
 
 class Workbook(ow.Workbook):
@@ -19,25 +20,27 @@ class Workbook(ow.Workbook):
     def print_self(self):
         print('我是自定义的哒！')
 
-    def find_sheet(self, sheetname):
-        sheet_names = self.sheetnames
-        find_name = self.rulestring(sheetname)
-        for name in sheet_names:
-            re_name = self.rulestring(name)
-            if((re_name == find_name) | (re_name in find_name) | (find_name in re_name)):
-                return name
+    def find_sheet(self,find_name:str):
+        find_name = Others.str_fix(find_name)
+        range_=range(len(self.sheetnames))
+        for i in range_:
+            re_name =Others.str_fix(self.sheetnames[i])
+            if (find_name in re_name) or (re_name in find_name):
+                return self.sheetnames[i]
+        return find_name
 
-    def load_sheet(self, sheetname: str, fuzzy: bool = False) -> Worksheet:
+    def load_sheet(self, sheetname: str,vague:bool=False) -> Worksheet:
         if isinstance(sheetname, str):
             if sheetname in self.sheetnames:
                 print('当前表格为：'+sheetname)
                 ws = self[sheetname]
                 return ws
-            elif fuzzy:
-                _sheet_name = self.find_sheet(sheetname)
-                return self.load_sheet(_sheet_name, False)
+            elif vague:
+                return self.load_sheet(self.find_sheet(sheetname))
+            else:
+                raise ValueError("can't find the sheet named {}".format(sheetname))
         else:
-            raise TypeError("sheetname must be not empty str.")
+            raise TypeError("sheetname must be str and not empty .")
 
     def create_sheet(self, sheetname):
         if sheetname in self.sheetnames:
