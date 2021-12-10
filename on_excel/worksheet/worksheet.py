@@ -173,8 +173,8 @@ class Worksheet(o_sheet.Worksheet):
                     groups.append((left, right))
                 right += 1
             else:
-                if right-1 > left:
-                    groups.append((left, right-1))
+                if right > left:
+                    groups.append((left, right))
                 left = right
 
         return groups
