@@ -33,6 +33,12 @@ class Worksheet(o_sheet.Worksheet):
         else:
             self.sheet_state = 'hidden'
 
+    @property
+    def merged_ranges(self):
+        from .merge import MergedCellRange
+        m_list:typing.List[MergedCellRange] = list(super().merged_cells)
+        return (rg for rg in m_list)
+
     def is_huge(self):
         if self.max_column > 50 or self.max_row > 100000:
             return True
@@ -75,15 +81,15 @@ class Worksheet(o_sheet.Worksheet):
         """
         if isinstance(value, str):
             if agg == 'equal':
-                return [cell.row for cell in self[on_col] if cell.value != None and cell.value == value]
+                return [cell.row for cell in self[on_col] if (cell.value != None) and (cell.value == value)]
             elif agg == 'start':
-                return [cell.row for cell in self[on_col] if cell.value != None and cell.value.startswith(value)]
+                return [cell.row for cell in self[on_col] if (cell.value != None) and (cell.value.startswith(value))]
             elif agg == 'in':
-                return [cell.row for cell in self[on_col] if cell.value != None and value in cell.value]
+                return [cell.row for cell in self[on_col] if (cell.value != None) and (value in cell.value)]
             elif agg == 'end':
-                return [cell.row for cell in self[on_col] if cell.value != None and cell.value.endswith(value)]
+                return [cell.row for cell in self[on_col] if (cell.value != None) and (cell.value.endswith(value))]
             elif agg == 'not_in':
-                return [cell.row for cell in self[on_col] if cell.value != None and value not in cell.value]
+                return [cell.row for cell in self[on_col] if (cell.value != None) and (value not in cell.value)]
         elif isinstance(value, list):
             ret = []
             for x in value:
@@ -97,11 +103,8 @@ class Worksheet(o_sheet.Worksheet):
         [self.append(row) for row in df.values.tolist()]
 
     def unmerge_cell(self, fill):
-
-        m_list = list(self.merged_cells)
-
         # 拆分合并的单元格 并填充内容
-        for m_area in m_list:
+        for m_area in self.merged_ranges:
             # 这里的行和列的起始值（索引），和Excel的一样，从1开始，并不是从0开始（注意）
             r1, r2, c1, c2 = m_area.min_row, m_area.max_row, m_area.min_col, m_area.max_col
 
@@ -150,7 +153,7 @@ class Worksheet(o_sheet.Worksheet):
             self[left_coordinate].alignment = alignment
         return self
 
-    def same_value_group(self, col:str):
+    def same_value_groups(self, col:str):
         """在 col 列寻找所有值连续相同的单元格，并返回其首尾行的列表
 
         Args:
@@ -257,16 +260,16 @@ class Worksheet(o_sheet.Worksheet):
             max_len = get_maxlength(self, letter, begin_cal_row)
             self.set_column_width(letter, max_len)
 
-    def get_cell_list(self, slice: str, filter: typing.List[int] = None):
+    def get_cell_list(self, slice: str, select: typing.List[int] = None):
         cell_list:typing.List[Cell] = []
        
         def get_cell(ele):
             if isinstance(ele,Cell):
-                if ele.row not in filter:
+                if select:
+                    if (ele.row in select):
+                        cell_list.append(ele)
+                else:
                     cell_list.append(ele)
-            elif isinstance(ele,(tuple,list)):
-                for a in ele:
-                    get_cell(a)
         
         get_cell(self[slice])
         return cell_list

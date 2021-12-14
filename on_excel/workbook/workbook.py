@@ -5,8 +5,7 @@ from openpyxl.utils.exceptions import ReadOnlyWorkbookException
 from openpyxl.worksheet._write_only import WriteOnlyWorksheet
 
 from ..worksheet.worksheet import Worksheet
-
-from ...utils.function import Others
+from pyworkkit.utils.function import Others
 
 
 class Workbook(ow.Workbook):
