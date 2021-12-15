@@ -1,5 +1,6 @@
 import typing
 
+
 import openpyxl.worksheet.worksheet as o_sheet
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 from openpyxl.utils import get_column_letter, column_index_from_string
@@ -8,6 +9,7 @@ import pandas as pd
 
 
 from ..cell import Cell, MergedCell
+from .merge import MergedCellRange,CellRange
 
 
 class Worksheet(o_sheet.Worksheet):
@@ -17,10 +19,6 @@ class Worksheet(o_sheet.Worksheet):
 
     def __init__(self, parent, title=None) -> None:
         super(Worksheet, self).__init__(parent, title)
-        if self.is_huge():
-            for col in self.columns:
-                print(col)
-            pass
 
     @property
     def visiable(self):
@@ -35,15 +33,18 @@ class Worksheet(o_sheet.Worksheet):
 
     @property
     def merged_ranges(self):
-        from .merge import MergedCellRange
-        m_list:typing.List[MergedCellRange] = list(super().merged_cells)
+        m_list:typing.List[MergedCellRange] = list(self.merged_cells)
         return (rg for rg in m_list)
 
-    def is_huge(self):
-        if self.max_column > 50 or self.max_row > 100000:
-            return True
-        else:
-            return False
+    def merge_cells(self, range_string=None, start_row=None, start_column=None, end_row=None, end_column=None):
+        """ Set merge on a cell range.  Range is a cell range (e.g. A1:E1) """
+        if range_string is None:
+            cr = CellRange(range_string=range_string, min_col=start_column, min_row=start_row,
+                      max_col=end_column, max_row=end_row)
+            range_string = cr.coord
+        mcr = MergedCellRange(self, range_string)
+        self.merged_cells.add(mcr)
+        self._clean_merge_range(mcr)
 
     def set_freeze_panes(self, coordinate: str):
         self.freeze_panes = coordinate

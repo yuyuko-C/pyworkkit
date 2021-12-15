@@ -7,6 +7,7 @@ from openpyxl.xml.constants import (
 
 
 from ..cell import Cell
+from .worksheet import Worksheet
 
 VALUE_TAG = '{%s}v' % SHEET_MAIN_NS
 
@@ -51,6 +52,14 @@ class WorksheetReader(o_reader.WorksheetReader):
     继承了原 WorksheetReader 的类，为了使用自定义的 Cell
     """
 
+    def __init__(self, ws, xml_source, shared_strings, data_only):
+        self.ws:Worksheet = ws
+        self.parser = WorkSheetParser(xml_source, shared_strings,
+                data_only, ws.parent.epoch, ws.parent._date_formats,
+                ws.parent._timedelta_formats)
+        self.tables = []
+
+
     # 重写此方法，用于使用自定义的 Cell
     def bind_cells(self):
         for idx, row in self.parser.parse():
@@ -64,3 +73,18 @@ class WorksheetReader(o_reader.WorksheetReader):
         self.ws.formula_attributes = self.parser.array_formulae
         if self.ws._cells:
             self.ws._current_row = self.ws.max_row  # use cells not row dimensions
+
+
+    def bind_merged_cells(self):
+        from openpyxl.worksheet.cell_range import MultiCellRange
+        from .merge import MergedCellRange
+        
+        if not self.parser.merged_cells:
+            return
+
+        ranges = []
+        for cr in self.parser.merged_cells.mergeCell:
+            mcr = MergedCellRange(self.ws, cr.ref)
+            self.ws._clean_merge_range(mcr)
+            ranges.append(mcr)
+        self.ws.merged_cells = MultiCellRange(ranges)

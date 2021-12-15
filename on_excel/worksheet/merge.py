@@ -1,14 +1,14 @@
 import openpyxl.worksheet.merge as o_merge
-from openpyxl.styles.borders import Border
+from openpyxl.worksheet.cell_range import CellRange
 
 from ..cell import Cell
-from .worksheet import Worksheet
 
 
 class MergedCellRange(o_merge.MergedCellRange):
-    def __init__(self, worksheet:Worksheet, coord):
+    def __init__(self, worksheet, coord):
+        from .worksheet import Worksheet
         super().__init__(worksheet, coord)
-        self.ws = worksheet
+        self.ws:Worksheet = worksheet
         self.start_cell:Cell=self.start_cell
 
     def unmerge(self):
@@ -27,4 +27,7 @@ class MergedCellRange(o_merge.MergedCellRange):
             else:  # 单列
                 self.ws.cell(r, c1).value = value
                 self.start_cell
-    
+                
+    @property
+    def shape(self):
+        return self.max_col-self.min_col+1,self.max_row-self.min_row+1
