@@ -1,6 +1,7 @@
 import openpyxl.worksheet.merge as o_merge
 from openpyxl.worksheet.cell_range import CellRange
 
+
 from ..cell import Cell
 
 
@@ -16,7 +17,7 @@ class MergedCellRange(o_merge.MergedCellRange):
         r1, r2, c1, c2 = self.min_row, self.max_row, self.min_col, self.max_col
         self.ws.unmerge_cells(start_row=r1, end_row=r2, start_column=c1, end_column=c2)
         
-    def fill(self,value:str):
+    def fill(self,value):
         r1, r2, c1, c2 = self.min_row, self.max_row, self.min_col, self.max_col
         # 数据填充
         for r in range(r1, r2+1):  # 遍历行

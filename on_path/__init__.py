@@ -19,8 +19,8 @@ def find_file_paths(path, include: typing.Union[list, str], exclude: typing.Unio
 
     pth = Path(path)
     paths:typing.List[str] = []
-    for file_name in pth.iterdir():
-        file_name = str(file_name)
+    for file_path in pth.iterdir():
+        file_name = file_path.name
         if any([word in file_name for word in include]):
             if file_name.startswith("~$") or (exclude and any([word in file_name for word in exclude])):
                 continue
