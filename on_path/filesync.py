@@ -1,4 +1,5 @@
 from .path import Path
+import typing
 
 
 class SyncGroup:
@@ -18,15 +19,20 @@ class SyncGroup:
         filters_path = []
         for p_filter in filters:
             real_f = self.source.joinpath(p_filter).relative_to(self.source)
-            filters_path.append(str(real_f))
-        self.__path_filters = filters_path
-        self.__filters_mode = filter_mode
+            filters_path.append(real_f)
+        self.__path_filters:typing.List[Path] = filters_path
+        self.__filters_mode:bool = filter_mode
 
     def __filter_check(self, relative_path: Path):
         for p_filter in self.__path_filters:
             if relative_path.is_relative_to(p_filter):
-                if self.__filters_mode:
-                    return not self.__filters_mode
+                return not self.__filters_mode
+        return self.__filters_mode
+
+    def __filter_parent_check(self, relative_path: Path):
+        for p_filter in self.__path_filters:
+            if p_filter.is_relative_to(relative_path):
+                return not self.__filters_mode
         return self.__filters_mode
 
     def __clean_target(self):
@@ -34,7 +40,7 @@ class SyncGroup:
         for target in self.target.walk_dir():
             relpath = target.relative_to(self.target)
             # 检查此路径能否通过过滤器
-            if self.__filter_check(relpath):
+            if self.__filter_check(relpath) or self.__filter_parent_check(relpath):
                 source = self.source.joinpath(relpath)
                 # 如果源路径被删除，也要移除
                 if not source.exists():
@@ -42,6 +48,7 @@ class SyncGroup:
             else:
                 # 不能通过过滤器则不该同步，直接移除
                 target.rmdir(True)
+
 
         # 再比较文件
         for target in self.target.walk_file():
