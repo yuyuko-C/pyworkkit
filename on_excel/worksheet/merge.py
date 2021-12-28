@@ -1,8 +1,10 @@
+import copy
 import openpyxl.worksheet.merge as o_merge
 from openpyxl.worksheet.cell_range import CellRange
+from openpyxl.styles.borders import Border
 
 
-from ..cell import Cell
+from ..cell import Cell,MergedCell
 
 
 class MergedCellRange(o_merge.MergedCellRange):
@@ -32,3 +34,45 @@ class MergedCellRange(o_merge.MergedCellRange):
     @property
     def shape(self):
         return self.max_col-self.min_col+1,self.max_row-self.min_row+1
+
+    def format(self):
+        """
+        Each cell of the merged cell is created as MergedCell if it does not
+        already exist.
+
+        The MergedCells at the edge of the merged cell gets its borders from
+        the upper left cell.
+
+         - The top MergedCells get the top border from the top left cell.
+         - The bottom MergedCells get the bottom border from the top left cell.
+         - The left MergedCells get the left border from the top left cell.
+         - The right MergedCells get the right border from the top left cell.
+        """
+
+        names = ['top', 'left', 'right', 'bottom']
+
+        for name in names:
+            side = getattr(self.start_cell.border, name)
+            if side and side.style is None:
+                continue # don't need to do anything if there is no border style
+            border = Border(**{name:side})
+            for coord in getattr(self, name):
+                cell = self.ws._cells.get(coord)
+                if cell is None:
+                    row, col = coord
+                    cell = MergedCell(self.ws, row=row, column=col)
+                    self.ws._cells[(cell.row, cell.column)] = cell
+                cell.border += border
+
+        protected = self.start_cell.protection is not None
+        if protected:
+            protection = copy.copy(self.start_cell.protection)
+        for coord in self.cells:
+            cell = self.ws._cells.get(coord)
+            if cell is None:
+                row, col = coord
+                cell = MergedCell(self.ws, row=row, column=col)
+                self.ws._cells[(cell.row, cell.column)] = cell
+
+            if protected:
+                cell.protection = protection

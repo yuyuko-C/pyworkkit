@@ -60,7 +60,7 @@ class Worksheet(o_sheet.Worksheet):
         if style:
             self.delete_rows(1, maxrow)
         else:
-            self.unmerge_cells(True)
+            self.unmerges(True)
             maxcol = self.max_column
             while row <= maxrow:
                 col = 1
@@ -103,28 +103,12 @@ class Worksheet(o_sheet.Worksheet):
         self.append(df.columns.values.tolist())
         [self.append(row) for row in df.values.tolist()]
 
-    def unmerge_cell(self, fill):
+    def unmerge(self, fill):
         # 拆分合并的单元格 并填充内容
         for m_area in self.merged_ranges:
-            # 这里的行和列的起始值（索引），和Excel的一样，从1开始，并不是从0开始（注意）
-            r1, r2, c1, c2 = m_area.min_row, m_area.max_row, m_area.min_col, m_area.max_col
-
-            self.unmerge_cells(
-                start_row=r1, end_row=r2, start_column=c1, end_column=c2)
-            # print('区域:', m_area, '  坐标:', r1, r2, c1, c2)
-
+            m_area.unmerge()
             if fill:
-                # 获取一个单元格的内容
-                first_value = self.cell(r1, c1).value
-
-                # 数据填充
-                for r in range(r1, r2+1):  # 遍历行
-                    if c2 - c1 > 0:  # 多个列，遍历列
-                        for c in range(c1, c2+1):
-                            self.cell(r, c).value = first_value
-                    else:  # 一个列
-                        self.cell(r, c1).value = first_value
-
+                m_area.fill(m_area.start_cell.value)
         return self
 
     def toDataframe(self, columns_row=0):
@@ -262,16 +246,19 @@ class Worksheet(o_sheet.Worksheet):
             self.set_column_width(letter, max_len)
 
     def get_cell_list(self, slice: str, select: typing.List[int] = None):
-        cell_list:typing.List[Cell] = []
+        cell_list:typing.List[typing.Union[Cell,MergedCell]] = []
        
         def get_cell(ele):
-            if isinstance(ele,Cell):
+            if isinstance(ele,(Cell,MergedCell)):
                 if select:
                     if (ele.row in select):
                         cell_list.append(ele)
                 else:
                     cell_list.append(ele)
-        
+            else:
+                for e in ele:
+                    get_cell(e)
+
         get_cell(self[slice])
         return cell_list
 
@@ -327,6 +314,21 @@ class Worksheet(o_sheet.Worksheet):
         cell = self._cells[coordinate]
         if isinstance(cell, (Cell, MergedCell)):
             return cell
+        else:
+            raise TypeError("Wrong Cell Type. {}".format(type(cell)))
+
+    # 重写此方法，用于使用自定义的 MergedCell
+    def _clean_merge_range(self, mcr):
+        """
+        Remove all but the top left-cell from a range of merged cells
+        and recreate the lost border information.
+        Borders are then applied
+        """
+        cells = mcr.cells
+        next(cells) # skip first cell
+        for row, col in cells:
+            self._cells[row, col] = MergedCell(self, row, col)
+        mcr.format()
 
     # 重写此方法，用于获取自定义类型
     def append(self, iterable):

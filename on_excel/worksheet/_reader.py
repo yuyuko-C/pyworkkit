@@ -6,7 +6,7 @@ from openpyxl.xml.constants import (
 )
 
 
-from ..cell import Cell
+from ..cell import Cell,MergedCell
 from .worksheet import Worksheet
 
 VALUE_TAG = '{%s}v' % SHEET_MAIN_NS
@@ -41,8 +41,7 @@ class WorkSheetParser(o_reader.WorkSheetParser):
         # 自定义：不读取值为空的元素
         # 可以改变maxrow与maxcolumn以及to_Dataframe方法
         # 不可改变保存后的结果
-        cells = [self.parse_cell(el)
-                 for el in row if el.findtext(VALUE_TAG, None)]
+        cells = [self.parse_cell(el)for el in row]
 
         return self.row_counter, cells
 
@@ -75,6 +74,7 @@ class WorksheetReader(o_reader.WorksheetReader):
             self.ws._current_row = self.ws.max_row  # use cells not row dimensions
 
 
+    # 重写此方法，用于使用自定义的 MergedCellRange
     def bind_merged_cells(self):
         from openpyxl.worksheet.cell_range import MultiCellRange
         from .merge import MergedCellRange
