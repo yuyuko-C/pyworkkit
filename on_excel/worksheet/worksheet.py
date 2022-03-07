@@ -5,6 +5,7 @@ import openpyxl.worksheet.worksheet as o_sheet
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 from openpyxl.utils import get_column_letter, column_index_from_string
 from inspect import isgenerator
+from copy import copy
 import pandas as pd
 
 
@@ -174,7 +175,10 @@ class Worksheet(o_sheet.Worksheet):
             for cell in row:
                 if isinstance(cell, Cell):
                     cell.copy_style(tar_sheet[cell.coordinate])
-
+                    font = copy(cell.font)
+                    font.color="000000"
+                    cell.font=font
+                    
     # 行列属性
     def set_columns_hide(self, columns, enable: bool):
         if isinstance(columns, str):

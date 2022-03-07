@@ -45,7 +45,7 @@ class Logs(object):
         logfilepath=os.path.join(logs_dir,logfilename)
         rotatingFileHandler = logging.handlers.RotatingFileHandler(filename =logfilepath,
                                                                    maxBytes = 1024 * 1024 * 50,
-                                                                   backupCount = 5)
+                                                                   backupCount = 5,encoding="utf8")
         # 设置输出格式
         formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', '%Y-%m-%d %H:%M:%S')
         rotatingFileHandler.setFormatter(formatter)

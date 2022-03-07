@@ -42,6 +42,7 @@ class WorkSheetParser(o_reader.WorkSheetParser):
         # 可以改变maxrow与maxcolumn以及to_Dataframe方法
         # 不可改变保存后的结果
         cells = [self.parse_cell(el)for el in row]
+        cells = [cell for cell in cells if cell["value"]!=None]
 
         return self.row_counter, cells
 
