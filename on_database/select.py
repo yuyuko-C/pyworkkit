@@ -1,7 +1,6 @@
 import peewee as pw
 import pandas as pd
 
-
 class ModelSelect(pw.ModelSelect):
 
     def to_dataframe(self):
@@ -43,3 +42,6 @@ class ModelSelect(pw.ModelSelect):
         ret: ModelSelect =  super().paginate(page, paginate_by=paginate_by)
         return ret
 
+    def join(self, dest, join_type=..., on=None, src=None, attr=None):
+        ret: ModelSelect = super().join(dest, join_type, on, src, attr)
+        return ret
