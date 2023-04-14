@@ -3,6 +3,7 @@
 ### 简介
     自动化办公工具包，用于提升工作效率。个人日常使用，吊打大部分自动化办公培训。
     因OCR需要飞桨（paddle）环境过于臃肿放弃集成，PDF相关功能不常用也并未加入。
+    Python版本：Python 3.8.3
 
 ### Requirments
     used:pandas/openpyxl/peewee/pywin32/pyautogui/opencv-python/pynput
